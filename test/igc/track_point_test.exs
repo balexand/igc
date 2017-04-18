@@ -9,7 +9,7 @@ defmodule Igc.TrackPointTest do
     time: "110135",
     latitude: "5206343N",
     longitude: "00006198W",
-    altitude_flag: "A",
+    validity: "A",
     pressure_altitude: "00587",
     gps_altitude: "00558"
   }
@@ -17,7 +17,7 @@ defmodule Igc.TrackPointTest do
   defp format(t \\ []) do
     t = Enum.into(t, @defaults)
 
-    "B#{t.time}#{t.latitude}#{t.longitude}#{t.altitude_flag}#{t.pressure_altitude}#{t.gps_altitude}"
+    "B#{t.time}#{t.latitude}#{t.longitude}#{t.validity}#{t.pressure_altitude}#{t.gps_altitude}"
   end
 
   test "format defaults" do
@@ -25,19 +25,20 @@ defmodule Igc.TrackPointTest do
   end
 
   describe "parse!" do
-    test "with defaults" do
-      assert TrackPoint.parse!(format()) == %Igc.TrackPoint{
-        latitude: 52.105716666666666,
-        longitude: -0.1033
-      }
-    end
-
     test "with S latitude" do
       assert TrackPoint.parse!(format(latitude: "5206343S")).latitude == -52.105716666666666
     end
 
     test "with E longitude" do
       assert TrackPoint.parse!(format(longitude: "00006198E")).longitude == 0.1033
+    end
+
+    test "with V validity" do
+      assert TrackPoint.parse!(format(validity: "V")).validity == "V"
+    end
+
+    test "with negative pressure_altitude" do
+      assert TrackPoint.parse!(format(pressure_altitude: "-0003")).pressure_altitude == -3
     end
   end
 end
