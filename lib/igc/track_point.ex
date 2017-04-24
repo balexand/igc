@@ -48,14 +48,6 @@ defmodule Igc.TrackPoint do
     end
   end
 
-  @doc """
-  Same as parse/1, but raises on error.
-  """
-  def parse!(data) do
-    {:ok, result} = parse(data)
-    result
-  end
-
   defp parse_altitude(altitude) do
     {result, ""} = Integer.parse(altitude)
     result
