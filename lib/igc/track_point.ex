@@ -26,11 +26,11 @@ defmodule Igc.TrackPoint do
       }}
 
       iex> Igc.TrackPoint.parse("B1101355206343X00006198WA0058700558")
-      {:error, "invalid format: \"B1101355206343X00006198WA0058700558\""}
+      {:error, "invalid track point: \"B1101355206343X00006198WA0058700558\""}
   """
   def parse(data) do
     case Regex.named_captures(@format, data) do
-      nil -> {:error, "invalid format: #{inspect data}"}
+      nil -> {:error, "invalid track point: #{inspect data}"}
       %{
         "lat_deg" => lat_deg, "lat_kminute" => lat_kminute, "lat_dir" => lat_dir,
         "lng_deg" => lng_deg, "lng_kminute" => lng_kminute, "lng_dir" => lng_dir,

@@ -48,7 +48,7 @@ defmodule Igc do
   defp handle_line(track, <<"HFDTE", ddmmyy::binary>>) do
     case Timex.parse(ddmmyy, "{0D}{0M}{YY}") do
       {:ok, datetime} -> {:ok, put_in(track.date, Timex.to_date(datetime))}
-      {:error, _} -> {:error, "invalid date: HFDTE#{ddmmyy}"}
+      {:error, _} -> {:error, "invalid date: #{inspect("HFDTE"<>ddmmyy)}"}
     end
   end
 
