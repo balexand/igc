@@ -67,5 +67,5 @@ defmodule Igc do
          do: {:ok, update_in(track.points, &([point | &1]))}
   end
 
-  defp handle_line(track, _line), do: {:ok, track} # TODO ensure test coverage
+  defp handle_line(track, _line), do: {:ok, track}
 end
