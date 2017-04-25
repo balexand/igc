@@ -28,35 +28,31 @@ defmodule Igc do
   end
 
   def parse(io) when is_pid(io) do
-    case parse(%Track{}, io) do
-      {:ok, track} -> {:ok, update_in(track.points, &Enum.reverse/1)}
-      result -> result
-    end
+    with {:ok, track} <- parse(%Track{}, io),
+         do: {:ok, update_in(track.points, &Enum.reverse/1)}
   end
 
   defp parse(track, io) do
     case IO.read(io, :line) do
       :eof -> {:ok, track}
+      # TODO handle FS errors
       line when is_binary(line) ->
-        case handle_line(track, String.trim(line)) do
-          {:ok, track} -> parse(track, io)
-          {:error, detail} -> {:error, detail}
-        end
+        with {:ok, track} <- handle_line(track, String.trim(line)),
+             do: parse(track, io)
     end
   end
 
   defp handle_line(track, <<"HFDTE", ddmmyy::binary>>) do
-    case Timex.parse(ddmmyy, "{0D}{0M}{YY}") do
-      {:ok, datetime} -> {:ok, put_in(track.date, Timex.to_date(datetime))}
-      {:error, _} -> {:error, "invalid date: #{inspect("HFDTE"<>ddmmyy)}"}
+    with {:ok, datetime} <- Timex.parse(ddmmyy, "{0D}{0M}{YY}") do
+      {:ok, put_in(track.date, Timex.to_date(datetime))}
+    else
+      _ -> {:error, "invalid date: #{inspect("HFDTE"<>ddmmyy)}"}
     end
   end
 
   defp handle_line(track, <<"B", b_record::binary>>) do
-    case TrackPoint.parse("B" <> b_record) do
-      {:ok, point} -> {:ok, update_in(track.points, &([point | &1]))}
-      {:error, detail} -> {:error, detail}
-    end
+    with {:ok, point} <- TrackPoint.parse("B" <> b_record),
+         do: {:ok, update_in(track.points, &([point | &1]))}
   end
 
   defp handle_line(track, _line), do: {:ok, track} # TODO ensure test coverage
