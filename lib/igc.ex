@@ -10,9 +10,9 @@ defmodule Igc do
 
   It returns:
   * `{:ok, track}` upon success
-  * `{:error, {:invalid_igc, reason}}` when the IGC file is invalid, where
+  * `{:error, :invalid_igc, reason}` when the IGC file is invalid, where
     `reason` is a human readable string explaining why the IGC is invalid
-  * `{:error, {:io, reason}}` when an error is returned by `IO.read/2`
+  * `{:error, :io, reason}` when an error is returned by `IO.read/2`
 
   ## Examples
 
@@ -29,7 +29,7 @@ defmodule Igc do
       }}
 
       iex> Igc.parse("HFDTE320709")
-      {:error, {:invalid_igc, "invalid date: \"HFDTE320709\""}}
+      {:error, :invalid_igc, "invalid date: \"HFDTE320709\""}
   """
   def parse(str) when is_binary(str) do
     {:ok, io} = StringIO.open(str)
@@ -45,11 +45,10 @@ defmodule Igc do
     case IO.read(io, :line) do
       :eof -> {:ok, track}
       {:error, reason} -> {:error, :io, reason}
-      # TODO handle FS errors
       line when is_binary(line) ->
         case handle_line(track, String.trim(line)) do
           {:ok, track} -> do_parse(track, io)
-          {:error, reason} -> {:error, {:invalid_igc, reason}}
+          {:error, reason} -> {:error, :invalid_igc, reason}
         end
     end
   end
