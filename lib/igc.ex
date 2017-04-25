@@ -24,7 +24,7 @@ defmodule Igc do
   """
   def parse(str) when is_binary(str) do
     {:ok, io} = StringIO.open(str)
-    parse(io)
+    try do: parse(io), after: {:ok, _} = StringIO.close(io)
   end
 
   def parse(io) when is_pid(io) do
