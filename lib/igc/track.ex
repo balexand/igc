@@ -1,3 +1,3 @@
 defmodule Igc.Track do
-  defstruct date: nil
+  defstruct date: nil, points: []
 end
