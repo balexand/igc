@@ -3,12 +3,19 @@ defmodule IgcTest do
   doctest Igc
 
   describe "parse/1" do
+    test "with IO error" do
+      {:ok, io} = StringIO.open("")
+      {:ok, _} = StringIO.close(io)
+
+      assert Igc.parse(io) == {:error, :io, :terminated}
+    end
+
     test "with invalid HFDTE" do
       assert Igc.parse("HFDTE320709\nB1101355206343N00006198WA0058700558") ==
-        {:error, "invalid date: \"HFDTE320709\""}
+        {:error, {:invalid_igc, "invalid date: \"HFDTE320709\""}}
 
       assert Igc.parse("HFDTEXX0709\nB1101355206343N00006198WA0058700558") ==
-        {:error, "invalid date: \"HFDTEXX0709\""}
+        {:error, {:invalid_igc, "invalid date: \"HFDTEXX0709\""}}
     end
 
     test "with trackpoints" do
@@ -28,7 +35,7 @@ defmodule IgcTest do
 
     test "with invalid trackpoint" do
       assert Igc.parse("HFDTE280709\nB1101355206343X00006198WA0058700558") ==
-        {:error, "invalid track point: \"B1101355206343X00006198WA0058700558\""}
+        {:error, {:invalid_igc, "invalid track point: \"B1101355206343X00006198WA0058700558\""}}
     end
 
     test "trackpoints spanning UTC days" do

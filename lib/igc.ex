@@ -8,6 +8,12 @@ defmodule Igc do
   @doc ~S"""
   Parses an IGC file.
 
+  It returns:
+  * `{:ok, track}` upon success
+  * `{:error, {:invalid_igc, reason}}` when the IGC file is invalid, where
+    `reason` is a human readable string explaining why the IGC is invalid
+  * `{:error, {:io, reason}}` when an error is returned by `IO.read/2`
+
   ## Examples
 
       iex> Igc.parse("HFDTE280709\nB1101355206343N00006198WA0058700558")
@@ -21,6 +27,9 @@ defmodule Igc do
           validity: "A"
         }]
       }}
+
+      iex> Igc.parse("HFDTE320709")
+      {:error, {:invalid_igc, "invalid date: \"HFDTE320709\""}}
   """
   def parse(str) when is_binary(str) do
     {:ok, io} = StringIO.open(str)
@@ -28,17 +37,20 @@ defmodule Igc do
   end
 
   def parse(io) when is_pid(io) do
-    with {:ok, track} <- parse(%Track{}, io),
+    with {:ok, track} <- do_parse(%Track{}, io),
          do: {:ok, update_in(track.points, &Enum.reverse/1)}
   end
 
-  defp parse(track, io) do
+  defp do_parse(track, io) do
     case IO.read(io, :line) do
       :eof -> {:ok, track}
+      {:error, reason} -> {:error, :io, reason}
       # TODO handle FS errors
       line when is_binary(line) ->
-        with {:ok, track} <- handle_line(track, String.trim(line)),
-             do: parse(track, io)
+        case handle_line(track, String.trim(line)) do
+          {:ok, track} -> do_parse(track, io)
+          {:error, reason} -> {:error, {:invalid_igc, reason}}
+        end
     end
   end
 
