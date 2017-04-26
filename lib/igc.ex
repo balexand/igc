@@ -62,7 +62,7 @@ defmodule Igc do
   end
 
   defp handle_line(track, <<"B", b_record::binary>>) do
-    with {:ok, point} <- TrackPoint.Parser.parse("B" <> b_record),
+    with {:ok, {point, _time}} <- TrackPoint.Parser.parse("B" <> b_record),
          do: {:ok, update_in(track.points, &([point | &1]))}
   end
 

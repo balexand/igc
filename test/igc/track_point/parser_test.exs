@@ -28,12 +28,14 @@ defmodule Igc.TrackPoint.ParserTest do
   describe "parse" do
     test "successfully" do
       assert parse("B1101355206343N00006198WA0058700558") ==
-        {:ok, %Igc.TrackPoint{
-          latitude: 52.105716666666666,
-          longitude: -0.1033,
-          validity: "A",
-          pressure_altitude: 587,
-          gps_altitude: 558
+        {:ok, {
+          %Igc.TrackPoint{
+            latitude: 52.105716666666666,
+            longitude: -0.1033,
+            validity: "A",
+            pressure_altitude: 587,
+            gps_altitude: 558
+          }, ~T[11:01:35]
         }}
     end
 
@@ -42,23 +44,23 @@ defmodule Igc.TrackPoint.ParserTest do
         {:error, "invalid track point: \"B1101355206343X00006198WA0058700558\""}
     end
     test "with S latitude" do
-      {:ok, result} = parse(format(latitude: "5206343S"))
-      assert result.latitude == -52.105716666666666
+      {:ok, {point, _}} = parse(format(latitude: "5206343S"))
+      assert point.latitude == -52.105716666666666
     end
 
     test "with E longitude" do
-      {:ok, result} = parse(format(longitude: "00006198E"))
-      assert result.longitude == 0.1033
+      {:ok, {point, _}} = parse(format(longitude: "00006198E"))
+      assert point.longitude == 0.1033
     end
 
     test "with V validity" do
-      {:ok, result} = parse(format(validity: "V"))
-      assert result.validity == "V"
+      {:ok, {point, _}} = parse(format(validity: "V"))
+      assert point.validity == "V"
     end
 
     test "with negative pressure_altitude" do
-      {:ok, result} = parse(format(pressure_altitude: "-0003"))
-      assert result.pressure_altitude == -3
+      {:ok, {point, _}} = parse(format(pressure_altitude: "-0003"))
+      assert point.pressure_altitude == -3
     end
   end
 end
