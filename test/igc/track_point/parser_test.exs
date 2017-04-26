@@ -1,5 +1,6 @@
-defmodule Igc.TrackPointTest do
+defmodule Igc.TrackPoint.ParserTest do
   alias Igc.TrackPoint
+  import Igc.TrackPoint.Parser, only: [parse: 1]
 
   use ExUnit.Case, async: true
   doctest TrackPoint
@@ -25,23 +26,38 @@ defmodule Igc.TrackPointTest do
   end
 
   describe "parse" do
+    test "successfully" do
+      assert parse("B1101355206343N00006198WA0058700558") ==
+        {:ok, %Igc.TrackPoint{
+          latitude: 52.105716666666666,
+          longitude: -0.1033,
+          validity: "A",
+          pressure_altitude: 587,
+          gps_altitude: 558
+        }}
+    end
+
+    test "invalid format" do
+      assert parse("B1101355206343X00006198WA0058700558") ==
+        {:error, "invalid track point: \"B1101355206343X00006198WA0058700558\""}
+    end
     test "with S latitude" do
-      {:ok, result} = TrackPoint.parse(format(latitude: "5206343S"))
+      {:ok, result} = parse(format(latitude: "5206343S"))
       assert result.latitude == -52.105716666666666
     end
 
     test "with E longitude" do
-      {:ok, result} = TrackPoint.parse(format(longitude: "00006198E"))
+      {:ok, result} = parse(format(longitude: "00006198E"))
       assert result.longitude == 0.1033
     end
 
     test "with V validity" do
-      {:ok, result} = TrackPoint.parse(format(validity: "V"))
+      {:ok, result} = parse(format(validity: "V"))
       assert result.validity == "V"
     end
 
     test "with negative pressure_altitude" do
-      {:ok, result} = TrackPoint.parse(format(pressure_altitude: "-0003"))
+      {:ok, result} = parse(format(pressure_altitude: "-0003"))
       assert result.pressure_altitude == -3
     end
   end
