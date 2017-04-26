@@ -10,9 +10,8 @@ defmodule Igc do
 
   It returns:
   * `{:ok, track}` upon success
-  * `{:error, :invalid_igc, reason}` when the IGC file is invalid, where
-    `reason` is a human readable string explaining why the IGC is invalid
-  * `{:error, :io, reason}` when an error is returned by `IO.read/2`
+  * `{:error, reason}` when the IGC file is invalid, where `reason` is a human
+    readable string explaining why the IGC is invalid
 
   ## Examples
 
@@ -30,27 +29,17 @@ defmodule Igc do
       }}
 
       iex> Igc.parse("HFDTE320709")
-      {:error, :invalid_igc, "invalid date: \"HFDTE320709\""}
+      {:error, "invalid date: \"HFDTE320709\""}
   """
   def parse(str) when is_binary(str) do
-    {:ok, io} = StringIO.open(str)
-    try do: parse(io), after: {:ok, _} = StringIO.close(io)
-  end
-
-  def parse(io) when is_pid(io) do
-    do_parse(%Track{}, io)
-  end
-
-  defp do_parse(track, io) do
-    case IO.read(io, :line) do
-      :eof -> {:ok, process_points(track)}
-      {:error, reason} -> {:error, :io, reason}
-      line when is_binary(line) ->
-        case handle_line(track, String.trim(line)) do
-          {:ok, track} -> do_parse(track, io)
-          {:error, reason} -> {:error, :invalid_igc, reason}
-        end
-    end
+    String.splitter(str, ["\r\n", "\n"], trim: true)
+    |> Enum.reduce_while(%Track{}, fn line, track ->
+      case handle_line(track, String.trim(line)) do
+        {:ok, track} -> {:cont, track}
+        {:error, reason} -> {:halt, {:error, reason}}
+      end
+    end)
+    |> post_process
   end
 
   defp handle_line(track, <<"HFDTE", ddmmyy::binary>>) do
@@ -68,9 +57,9 @@ defmodule Igc do
 
   defp handle_line(track, _line), do: {:ok, track}
 
-  defp process_points(track) do
+  defp post_process(track = %Track{}) do
     # TODO handle file without date
-    update_in(track.points, fn pairs ->
+    track = update_in(track.points, fn pairs ->
       pairs
       |> Enum.reverse
       |> Enum.map(fn {point, time} ->
@@ -78,5 +67,9 @@ defmodule Igc do
         put_in point.datetime, datetime
       end)
     end)
+
+    {:ok, track}
   end
+
+  defp post_process(error), do: error
 end
