@@ -23,8 +23,8 @@ defmodule Igc.TrackPoint.Parser do
             latitude: parse_coord!(lat_deg, lat_kminute, lat_dir, {"S", "N"}),
             longitude: parse_coord!(lng_deg, lng_kminute, lng_dir, {"W", "E"}),
             validity: validity,
-            pressure_altitude: parse_altitude(pressure_altitude),
-            gps_altitude: parse_altitude(gps_altitude)
+            pressure_altitude: String.to_integer(pressure_altitude),
+            gps_altitude: String.to_integer(gps_altitude)
           },
           parse_time(hour, minute, second)
         }}
@@ -33,23 +33,15 @@ defmodule Igc.TrackPoint.Parser do
 
   defp parse_time(hour, minute, second) do
     [hour, minute, second] = [hour, minute, second]
-    |> Enum.map(fn str ->
-      {i, ""} = Integer.parse(str)
-      i
-    end)
+    |> Enum.map(&String.to_integer/1)
 
     {:ok, time} = Time.new(hour, minute, second)
     time
   end
 
-  defp parse_altitude(altitude) do
-    {result, ""} = Integer.parse(altitude)
-    result
-  end
-
   defp parse_coord!(deg, kminutes, direction, {negative, positive}) do
-    {deg, ""} = Integer.parse(deg)
-    {kminutes, ""} = Integer.parse(kminutes)
+    deg = String.to_integer(deg)
+    kminutes = String.to_integer(kminutes)
 
     sign = case direction do
       ^negative -> -1
