@@ -5,5 +5,5 @@ defmodule Igc.TrackPoint do
   """
 
   @enforce_keys [:latitude, :longitude, :validity, :pressure_altitude, :gps_altitude]
-  defstruct @enforce_keys
+  defstruct [:datetime] ++ @enforce_keys
 end

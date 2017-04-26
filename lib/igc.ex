@@ -20,6 +20,7 @@ defmodule Igc do
       {:ok, %Igc.Track{
         date: ~D[2009-07-28],
         points: [%Igc.TrackPoint{
+          datetime: ~N[2009-07-28 11:01:35],
           gps_altitude: 558,
           latitude: 52.105716666666666,
           longitude: -0.1033,
@@ -37,13 +38,12 @@ defmodule Igc do
   end
 
   def parse(io) when is_pid(io) do
-    with {:ok, track} <- do_parse(%Track{}, io),
-         do: {:ok, update_in(track.points, &Enum.reverse/1)}
+    do_parse(%Track{}, io)
   end
 
   defp do_parse(track, io) do
     case IO.read(io, :line) do
-      :eof -> {:ok, track}
+      :eof -> {:ok, process_points(track)}
       {:error, reason} -> {:error, :io, reason}
       line when is_binary(line) ->
         case handle_line(track, String.trim(line)) do
@@ -62,9 +62,21 @@ defmodule Igc do
   end
 
   defp handle_line(track, <<"B", b_record::binary>>) do
-    with {:ok, {point, _time}} <- TrackPoint.Parser.parse("B" <> b_record),
+    with {:ok, point} <- TrackPoint.Parser.parse("B" <> b_record),
          do: {:ok, update_in(track.points, &([point | &1]))}
   end
 
   defp handle_line(track, _line), do: {:ok, track}
+
+  defp process_points(track) do
+    # TODO handle file without date
+    update_in(track.points, fn pairs ->
+      pairs
+      |> Enum.reverse
+      |> Enum.map(fn {point, time} ->
+        {:ok, datetime} = NaiveDateTime.new(track.date, time)
+        put_in point.datetime, datetime
+      end)
+    end)
+  end
 end

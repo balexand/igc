@@ -31,8 +31,12 @@ defmodule IgcTest do
       {:ok, track} = Igc.parse(igc)
 
       assert length(track.points) == 3
-      assert Enum.map(track.points, &(Map.take(&1, [:latitude]))) ==
-        [%{latitude: 52.105716666666666}, %{latitude: 53.10431666666667}, %{latitude: 54.105}]
+      assert Enum.map(track.points, &(Map.take(&1, [:latitude, :datetime]))) ==
+        [
+          %{datetime: ~N[2009-07-28 11:01:35], latitude: 52.105716666666666},
+          %{datetime: ~N[2009-07-28 11:01:45], latitude: 53.10431666666667},
+          %{datetime: ~N[2009-07-28 11:01:55], latitude: 54.105}
+        ]
     end
 
     test "with invalid trackpoint" do
