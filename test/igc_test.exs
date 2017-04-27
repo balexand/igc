@@ -11,6 +11,9 @@ defmodule IgcTest do
 
       assert Igc.parse("HFDTEXX0709\nB1101355206343N00006198WA0058700558") ==
         {:error, "invalid date: \"HFDTEXX0709\""}
+
+      assert Igc.parse("HFDTE3107090\nB1101355206343N00006198WA0058700558") ==
+        {:error, "invalid date: \"HFDTE3107090\""}
     end
 
     test "with trackpoints" do

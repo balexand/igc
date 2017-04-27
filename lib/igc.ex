@@ -43,8 +43,8 @@ defmodule Igc do
   end
 
   defp handle_line(track, <<"HFDTE", ddmmyy::binary>>) do
-    with {:ok, datetime} <- Timex.parse(ddmmyy, "{0D}{0M}{YY}") do
-      {:ok, put_in(track.date, Timex.to_date(datetime))}
+    with {:ok, date} <- parse_date(ddmmyy) do
+      {:ok, put_in(track.date, date)}
     else
       _ -> {:error, "invalid date: #{inspect("HFDTE"<>ddmmyy)}"}
     end
@@ -69,7 +69,7 @@ defmodule Igc do
         {:ok, datetime} = NaiveDateTime.new(NaiveDateTime.to_date(last_datetime), time)
 
         datetime = case NaiveDateTime.compare(datetime, last_datetime) do
-          :lt -> Timex.shift(datetime, days: 1)
+          :lt -> increment_date(datetime)
           _ -> datetime
         end
 
@@ -82,4 +82,29 @@ defmodule Igc do
   end
 
   defp post_process(error), do: error
+
+  defp parse_date(<<day::bytes-size(2), month::bytes-size(2), year::bytes-size(2)>>) do
+    with {day, ""} <- Integer.parse(day),
+         {month, ""} <- Integer.parse(month),
+         {year, ""} <- Integer.parse(year),
+         {:ok, date} <- Date.new(year + 2000, month, day),
+    do: {:ok, date},
+    else: (_ -> :error)
+  end
+
+  defp parse_date(_), do: :error
+
+  defp increment_date(datetime = %NaiveDateTime{}) do
+    days = datetime
+    |> NaiveDateTime.to_date
+    |> Date.to_erl
+    |> :calendar.date_to_gregorian_days
+
+    {:ok, incremented} = days + 1
+    |> :calendar.gregorian_days_to_date
+    |> Date.from_erl!
+    |> NaiveDateTime.new(NaiveDateTime.to_time(datetime))
+
+    incremented
+  end
 end
