@@ -60,6 +60,11 @@ defmodule IgcTest do
         ]
     end
 
+    test "without date" do
+      assert Igc.parse("B1101355206343N00006198WA0058700558") ==
+        {:error, "file must include date"}
+    end
+
     test "ignores unknown lines" do
       assert {:ok, %Track{}} = Igc.parse("HFDTE280709\nHFWTF\nB1101355206343N00006198WA0058700558")
     end

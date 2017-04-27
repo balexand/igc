@@ -57,8 +57,9 @@ defmodule Igc do
 
   defp handle_line(track, _line), do: {:ok, track}
 
+  defp post_process(%Track{date: nil}), do: {:error, "file must include date"}
+
   defp post_process(track = %Track{}) do
-    # TODO handle file without date
     {:ok, start} = NaiveDateTime.new(track.date, ~T[00:00:00])
 
     track = update_in(track.points, fn pairs ->
