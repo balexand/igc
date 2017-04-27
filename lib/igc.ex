@@ -59,13 +59,22 @@ defmodule Igc do
 
   defp post_process(track = %Track{}) do
     # TODO handle file without date
+    {:ok, start} = NaiveDateTime.new(track.date, ~T[00:00:00])
+
     track = update_in(track.points, fn pairs ->
       pairs
       |> Enum.reverse
-      |> Enum.map(fn {point, time} ->
-        {:ok, datetime} = NaiveDateTime.new(track.date, time)
-        put_in point.datetime, datetime
+      |> Enum.map_reduce(start, fn({point, time}, last_datetime) ->
+        {:ok, datetime} = NaiveDateTime.new(NaiveDateTime.to_date(last_datetime), time)
+
+        datetime = case NaiveDateTime.compare(datetime, last_datetime) do
+          :lt -> Timex.shift(datetime, days: 1)
+          _ -> datetime
+        end
+
+        {put_in(point.datetime, datetime), datetime}
       end)
+      |> elem(0)
     end)
 
     {:ok, track}
