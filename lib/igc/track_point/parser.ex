@@ -6,7 +6,7 @@ defmodule Igc.TrackPoint.Parser do
   # Parses an IGC B-Record. For details, see
   # http://carrier.csi.cam.ac.uk/forsterlewis/soaring/igc_file_format/
   def parse(data) do
-    with <<"B",
+    with << "B",
             hour::bytes-size(2),
             minute::bytes-size(2),
             second::bytes-size(2),
@@ -19,23 +19,22 @@ defmodule Igc.TrackPoint.Parser do
             validity::bytes-size(1),
             pressure_altitude::bytes-size(5),
             gps_altitude::bytes-size(5),
-            _trailing::binary>> <- data,
+            _trailing::binary >> <- data,
          {:ok, time} <- parse_time(hour, minute, second),
          {:ok, lat} <- parse_coord(lat_deg, lat_kminute, lat_dir, {"S", "N"}),
          {:ok, lng} <- parse_coord(lng_deg, lng_kminute, lng_dir, {"W", "E"}),
          {:ok, pressure_altitude} <- parse_int(pressure_altitude),
          {:ok, gps_altitude} <- parse_int(gps_altitude)
     do
-      {:ok, {
-        %TrackPoint{
-          latitude: lat,
-          longitude: lng,
-          validity: validity,
-          pressure_altitude: pressure_altitude,
-          gps_altitude: gps_altitude
-        },
-        time
-      }}
+      point = %TrackPoint{
+        latitude: lat,
+        longitude: lng,
+        validity: validity,
+        pressure_altitude: pressure_altitude,
+        gps_altitude: gps_altitude
+      }
+
+      {:ok, {point, time}}
     else
       _ -> {:error, "invalid track point: #{inspect data}"}
     end
