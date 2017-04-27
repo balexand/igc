@@ -6,8 +6,6 @@ defmodule Igc.TrackPoint.Parser do
   # Parses an IGC B-Record. For details, see
   # http://carrier.csi.cam.ac.uk/forsterlewis/soaring/igc_file_format/
   def parse(data) do
-    data = String.slice(data, 0..34)
-
     with <<"B",
             hour::bytes-size(2),
             minute::bytes-size(2),
@@ -20,7 +18,8 @@ defmodule Igc.TrackPoint.Parser do
             lng_dir::bytes-size(1),
             validity::bytes-size(1),
             pressure_altitude::bytes-size(5),
-            gps_altitude::bytes-size(5)>> <- data,
+            gps_altitude::bytes-size(5),
+            _trailing::binary>> <- data,
          {:ok, time} <- parse_time(hour, minute, second),
          {:ok, lat} <- parse_coord(lat_deg, lat_kminute, lat_dir, {"S", "N"}),
          {:ok, lng} <- parse_coord(lng_deg, lng_kminute, lng_dir, {"W", "E"}),
