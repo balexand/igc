@@ -39,10 +39,16 @@ defmodule Igc.TrackPoint.ParserTest do
         }}
     end
 
-    test "invalid format" do
+    test "invalid latitude direction" do
       assert parse("B1101355206343X00006198WA0058700558") ==
         {:error, "invalid track point: \"B1101355206343X00006198WA0058700558\""}
     end
+
+    test "invalid time integer" do
+      assert parse("B1.01355206343N00006198WA0058700558") ==
+        {:error, "invalid track point: \"B1.01355206343N00006198WA0058700558\""}
+    end
+
     test "with S latitude" do
       {:ok, {point, _}} = parse(format(latitude: "5206343S"))
       assert point.latitude == -52.105716666666666
