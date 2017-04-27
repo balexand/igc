@@ -23,8 +23,8 @@ defmodule Igc.TrackPoint.Parser do
          {:ok, time} <- parse_time(hour, minute, second),
          {:ok, lat} <- parse_coord(lat_deg, lat_kminute, lat_dir, {"S", "N"}),
          {:ok, lng} <- parse_coord(lng_deg, lng_kminute, lng_dir, {"W", "E"}),
-         {pressure_altitude, ""} <- Integer.parse(pressure_altitude),
-         {gps_altitude, ""} <- Integer.parse(gps_altitude)
+         {:ok, pressure_altitude} <- parse_int(pressure_altitude),
+         {:ok, gps_altitude} <- parse_int(gps_altitude)
     do
       {:ok, {
         %TrackPoint{
@@ -42,15 +42,15 @@ defmodule Igc.TrackPoint.Parser do
   end
 
   defp parse_time(hour, minute, second) do
-    with {hour, ""} <- Integer.parse(hour),
-         {minute, ""} <- Integer.parse(minute),
-         {second, ""} <- Integer.parse(second),
+    with {:ok, hour} <- parse_int(hour),
+         {:ok, minute} <- parse_int(minute),
+         {:ok, second} <- parse_int(second),
     do: Time.new(hour, minute, second)
   end
 
   defp parse_coord(deg, kminutes, dir, dirs) do
-    with {deg, ""} <- Integer.parse(deg),
-         {kminutes, ""} <- Integer.parse(kminutes),
+    with {:ok, deg} <- parse_int(deg),
+         {:ok, kminutes} <- parse_int(kminutes),
          {:ok, sign} <- coord_sign(dir, dirs)
     do
       {:ok, (deg + kminutes * 0.001 / 60) * sign}
@@ -60,4 +60,12 @@ defmodule Igc.TrackPoint.Parser do
   defp coord_sign(neg, {neg, _pos}), do: {:ok, -1}
   defp coord_sign(pos, {_neg, pos}), do: {:ok, 1}
   defp coord_sign(_, _), do: :error
+
+  defp parse_int(str) do
+    try do
+      {:ok, String.to_integer(str)}
+    rescue
+      ArgumentError -> :error
+    end
+  end
 end
