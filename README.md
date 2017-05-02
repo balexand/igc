@@ -1,11 +1,11 @@
 # Igc
 
-**TODO: Add description**
+Library for parsing IGC paragliding track files.
 
 ## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `igc` to your list of dependencies in `mix.exs`:
+The package can be installed by adding `igc` to your list of dependencies in
+`mix.exs`:
 
 ```elixir
 def deps do
@@ -13,7 +13,10 @@ def deps do
 end
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/igc](https://hexdocs.pm/igc).
+## Usage
 
+```elixir
+{:ok, track} = Igc.parse("HFDTE280709\nB1101355206343N00006198WA0058700558")
+```
+
+The docs can be found at [https://hexdocs.pm/igc](https://hexdocs.pm/igc).
