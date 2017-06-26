@@ -85,4 +85,16 @@ defmodule IgcTest do
         {:error, "file must include date"}
     end
   end
+
+  describe "parse!/1" do
+    test "with valid IGC" do
+      assert %Track{} = Igc.parse!(@valid_igc)
+    end
+
+    test "with invalid IGC" do
+      assert_raise ArgumentError, "file must include date", fn ->
+        Igc.parse!("")
+      end
+    end
+  end
 end

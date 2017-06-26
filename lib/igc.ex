@@ -27,6 +27,13 @@ defmodule Igc do
     end
   end
 
+  def parse!(igc) do
+    case parse(igc) do
+      {:ok, track} -> track
+      {:error, reason} -> raise ArgumentError, reason
+    end
+  end
+
   defp handle_line(track, <<"HFDTE", ddmmyy::binary>>) do
     with {:ok, date} <- parse_date(ddmmyy) do
       {:ok, put_in(track.date, date)}
