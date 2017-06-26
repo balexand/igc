@@ -47,8 +47,8 @@ defmodule Igc do
   defp post_process(track = %Track{points: [_, _ | _]}) do
     {:ok, start} = NaiveDateTime.new(track.date, ~T[00:00:00])
 
-    track = update_in(track.points, fn pairs ->
-      pairs
+    points =
+      track.points
       |> Enum.reverse
       |> Enum.map_reduce(start, fn({point, time}, last_datetime) ->
         {:ok, datetime} = NaiveDateTime.new(NaiveDateTime.to_date(last_datetime), time)
@@ -61,9 +61,14 @@ defmodule Igc do
         {put_in(point.datetime, datetime), datetime}
       end)
       |> elem(0)
-    end)
 
-    {:ok, track}
+    new_track = %{track |
+      landing: List.last(points),
+      points: points,
+      take_off: List.first(points)
+    }
+
+    {:ok, new_track}
   end
 
   defp post_process(%Track{}) do

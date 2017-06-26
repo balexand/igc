@@ -1,3 +1,6 @@
 defmodule Igc.Track do
-  defstruct date: nil, points: []
+  defstruct date: nil,
+            landing: nil,
+            points: [],
+            take_off: nil
 end
