@@ -18,14 +18,13 @@ defmodule IgcTest do
       {:ok, track} = Igc.parse(@valid_igc)
 
       assert length(track.points) == 2
-      assert Enum.map(track.points, &(Map.take(&1, [:latitude, :datetime]))) ==
-        [
-          %{datetime: ~N[2009-07-28 11:01:35], latitude: 52.105716666666666},
-          %{datetime: ~N[2009-07-28 11:01:45], latitude: 53.10431666666667}
-        ]
+      assert track.points == [
+        %TrackPoint{datetime: ~N[2009-07-28 11:01:35], gps_altitude: 558, latitude: 52.105716666666666, longitude: -0.1033, pressure_altitude: 587, validity: "A"},
+        %TrackPoint{datetime: ~N[2009-07-28 11:01:45], gps_altitude: 556, latitude: 53.10431666666667, longitude: -0.10491666666666667, pressure_altitude: 593, validity: "A"}
+      ]
 
-      assert %TrackPoint{latitude: 53.10431666666667} = track.landing
       assert %TrackPoint{latitude: 52.105716666666666} = track.take_off
+      assert %TrackPoint{latitude: 53.10431666666667}  = track.landing
     end
 
     test "with trackpoints spanning UTC days" do
