@@ -6,30 +6,12 @@ defmodule Igc do
   """
 
   @doc ~S"""
-  Parses an IGC file.
+  Parses an IGC string.
 
   It returns:
   * `{:ok, track}` upon success
   * `{:error, reason}` when the IGC file is invalid, where `reason` is a human
     readable string explaining why the IGC is invalid
-
-  ## Examples
-
-      iex> Igc.parse("HFDTE280709\nB1101355206343N00006198WA0058700558")
-      {:ok, %Igc.Track{
-        date: ~D[2009-07-28],
-        points: [%Igc.TrackPoint{
-          datetime: ~N[2009-07-28 11:01:35],
-          gps_altitude: 558,
-          latitude: 52.105716666666666,
-          longitude: -0.1033,
-          pressure_altitude: 587,
-          validity: "A"
-        }]
-      }}
-
-      iex> Igc.parse("HFDTE320709")
-      {:error, "invalid date: \"HFDTE320709\""}
   """
   def parse(str) when is_binary(str) do
     String.splitter(str, ["\r\n", "\n"], trim: true)
