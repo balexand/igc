@@ -38,9 +38,10 @@ defmodule Igc.Stats do
   end
 
   defp to_average_point(%TrackPoint{} = point) do
-    %AveragePoint{
-      timestamp: point.datetime |> DateTime.from_naive!("Etc/UTC") |> DateTime.to_unix,
-      pressure_altitude: point.pressure_altitude, # FIXME cleanup
-    }
+    %AveragePoint{}
+    |> Map.drop([:__struct__, :timestamp])
+    |> Map.keys
+    |> Enum.reduce(%AveragePoint{}, fn(k, i) -> %{i | k => Map.get(point, k)} end)
+    |> Map.put(:timestamp, point.datetime |> DateTime.from_naive!("Etc/UTC") |> DateTime.to_unix)
   end
 end
