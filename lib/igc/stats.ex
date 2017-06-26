@@ -5,17 +5,33 @@ defmodule Igc.Stats do
 
   alias Igc.{Track, TrackPoint}
 
+  defmodule AveragePoint do
+    @moduledoc false
+    defstruct [:timestamp, :pressure_altitude]
+  end
+
   def calculate(%Track{points: points}) do
     # points -> averaged points -> diffs -> max/min
 
-    {average_points, _} =
-      points
-      |> Enum.map(&to_average_point/1)
-      |> Enum.flat_map_reduce([], &rolling_average/2)
+    points
+    |> Enum.map(&to_average_point/1)
+    |> to_rolling_average
+    |> to_rates
+    |> Enum.reduce(%__MODULE__{}, fn(rate, stats) ->
+      %{stats |
+        max_climb: max(stats.max_climb, rate.pressure_altitude)
+      }
+    end)
+  end
 
-    [head|tail] = average_points
+  defp to_rolling_average(points) do
+    {avg_points, _} = Enum.flat_map_reduce(points, [], &rolling_average_reducer/2)
+    avg_points
+  end
 
+  defp to_rates([head | tail]) do
     {rates, _} = Enum.map_reduce(tail, head, fn(point, prev) ->
+      # FIXME cleanup
       a = (point.pressure_altitude - prev.pressure_altitude) / (point.timestamp - prev.timestamp)
 
       rate = %{point |
@@ -25,21 +41,14 @@ defmodule Igc.Stats do
       {rate, point}
     end)
 
-    %__MODULE__{
-      max_climb: Enum.max(Enum.map(rates, & &1.pressure_altitude))
-    }
+    rates
   end
 
-  defmodule AveragePoint do
-    @moduledoc false
-    defstruct [:timestamp, :pressure_altitude]
-  end
-
-  defp rolling_average(point, []) do
+  defp rolling_average_reducer(point, []) do
     {[], [point]}
   end
 
-  defp rolling_average(%AveragePoint{} = point, previous) when is_list(previous) do
+  defp rolling_average_reducer(%AveragePoint{} = point, previous) when is_list(previous) do
     new_window = average_window(point, previous)
 
     # FIXME cleanup
@@ -63,7 +72,7 @@ defmodule Igc.Stats do
   defp to_average_point(%TrackPoint{} = point) do
     %AveragePoint{
       timestamp: point.datetime |> DateTime.from_naive!("Etc/UTC") |> DateTime.to_unix,
-      pressure_altitude: point.pressure_altitude,
+      pressure_altitude: point.pressure_altitude, # FIXME cleanup
     }
   end
 end
