@@ -8,33 +8,36 @@ defmodule Igc.Stats do
     defstruct [:timestamp, :pressure_altitude]
   end
 
-  def calculate(%Track{points: points}) do
-    # points -> averaged points -> diffs -> max/min
+  defmodule RatePoint do
+    @moduledoc false
+    defstruct [:climb_rate]
+  end
 
+  def calculate(%Track{points: points}) do
     points
     |> Enum.map(&to_average_point/1)
     |> Igc.Stats.RollingAverage.average()
     |> to_rates
-    |> Enum.reduce(%__MODULE__{}, fn(rate, stats) ->
+    |> Enum.reduce(%__MODULE__{}, fn(%RatePoint{} = rate, %__MODULE__{} = stats) ->
       %{stats |
-        max_climb: max(stats.max_climb, rate.pressure_altitude)
+        max_climb: max(stats.max_climb, rate.climb_rate)
       }
     end)
   end
 
   defp to_rates([head | tail]) do
-    {rates, _} = Enum.map_reduce(tail, head, fn(point, prev) ->
-      # FIXME cleanup
-      a = (point.pressure_altitude - prev.pressure_altitude) / (point.timestamp - prev.timestamp)
-
-      rate = %{point |
-        pressure_altitude: a
-      }
-
-      {rate, point}
-    end)
-
+    {rates, _} = Enum.map_reduce(tail, head, &to_rate_reducer/2)
     rates
+  end
+
+  defp to_rate_reducer(%AveragePoint{} = point, %AveragePoint{} = prev) do
+    delta_t = point.timestamp - prev.timestamp
+
+    rate = %RatePoint{
+      climb_rate: (point.pressure_altitude - prev.pressure_altitude) / delta_t
+    }
+
+    {rate, point}
   end
 
   defp to_average_point(%TrackPoint{} = point) do
