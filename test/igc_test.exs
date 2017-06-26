@@ -84,6 +84,13 @@ defmodule IgcTest do
       assert Igc.parse(@valid_points) ==
         {:error, "file must include date"}
     end
+
+    test "with IO error" do
+      {:ok, io} = StringIO.open(@valid_igc)
+      StringIO.close(io)
+
+      assert Igc.parse(io) == {:io_error, :terminated}
+    end
   end
 
   describe "parse!/1" do
