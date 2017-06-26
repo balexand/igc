@@ -6,30 +6,12 @@ defmodule Igc do
   """
 
   @doc ~S"""
-  Parses an IGC file.
+  Parses an IGC string.
 
   It returns:
   * `{:ok, track}` upon success
   * `{:error, reason}` when the IGC file is invalid, where `reason` is a human
     readable string explaining why the IGC is invalid
-
-  ## Examples
-
-      iex> Igc.parse("HFDTE280709\nB1101355206343N00006198WA0058700558")
-      {:ok, %Igc.Track{
-        date: ~D[2009-07-28],
-        points: [%Igc.TrackPoint{
-          datetime: ~N[2009-07-28 11:01:35],
-          gps_altitude: 558,
-          latitude: 52.105716666666666,
-          longitude: -0.1033,
-          pressure_altitude: 587,
-          validity: "A"
-        }]
-      }}
-
-      iex> Igc.parse("HFDTE320709")
-      {:error, "invalid date: \"HFDTE320709\""}
   """
   def parse(str) when is_binary(str) do
     String.splitter(str, ["\r\n", "\n"], trim: true)
@@ -39,7 +21,10 @@ defmodule Igc do
         {:error, reason} -> {:halt, {:error, reason}}
       end
     end)
-    |> post_process
+    |> case do
+      %Track{} = track -> post_process(track)
+      {:error, reason} -> {:error, reason}
+    end
   end
 
   defp handle_line(track, <<"HFDTE", ddmmyy::binary>>) do
@@ -59,7 +44,7 @@ defmodule Igc do
 
   defp post_process(%Track{date: nil}), do: {:error, "file must include date"}
 
-  defp post_process(track = %Track{}) do
+  defp post_process(track = %Track{points: [_, _ | _]}) do
     {:ok, start} = NaiveDateTime.new(track.date, ~T[00:00:00])
 
     track = update_in(track.points, fn pairs ->
@@ -81,7 +66,9 @@ defmodule Igc do
     {:ok, track}
   end
 
-  defp post_process(error), do: error
+  defp post_process(%Track{}) do
+    {:error, "must contain at least 2 points"}
+  end
 
   defp parse_date(<<day::bytes-size(2), month::bytes-size(2), year::bytes-size(2)>>) do
     with {day, ""} <- Integer.parse(day),
