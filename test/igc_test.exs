@@ -5,18 +5,7 @@ defmodule IgcTest do
   doctest Igc
 
   describe "parse/1" do
-    test "with invalid HFDTE" do
-      assert Igc.parse("HFDTE320709\nB1101355206343N00006198WA0058700558") ==
-        {:error, "invalid date: \"HFDTE320709\""}
-
-      assert Igc.parse("HFDTEXX0709\nB1101355206343N00006198WA0058700558") ==
-        {:error, "invalid date: \"HFDTEXX0709\""}
-
-      assert Igc.parse("HFDTE3107090\nB1101355206343N00006198WA0058700558") ==
-        {:error, "invalid date: \"HFDTE3107090\""}
-    end
-
-    test "with trackpoints" do
+    test "with valid data" do
       igc = """
       HFDTE280709
       B1101355206343N00006198WA0058700558
@@ -35,12 +24,7 @@ defmodule IgcTest do
         ]
     end
 
-    test "with invalid trackpoint" do
-      assert Igc.parse("HFDTE280709\nB1101355206343X00006198WA0058700558") ==
-        {:error, "invalid track point: \"B1101355206343X00006198WA0058700558\""}
-    end
-
-    test "trackpoints spanning UTC days" do
+    test "with trackpoints spanning UTC days" do
       igc = """
       HFDTE250815
       B2359574235690N11052753WA027270289600604673030-0085
@@ -63,13 +47,29 @@ defmodule IgcTest do
         ]
     end
 
+    test "with unknown lines" do
+      assert {:ok, %Track{}} = Igc.parse("HFDTE280709\nHFWTF\nB1101355206343N00006198WA0058700558")
+    end
+
+    test "with invalid HFDTE" do
+      assert Igc.parse("HFDTE320709\nB1101355206343N00006198WA0058700558") ==
+        {:error, "invalid date: \"HFDTE320709\""}
+
+      assert Igc.parse("HFDTEXX0709\nB1101355206343N00006198WA0058700558") ==
+        {:error, "invalid date: \"HFDTEXX0709\""}
+
+      assert Igc.parse("HFDTE3107090\nB1101355206343N00006198WA0058700558") ==
+        {:error, "invalid date: \"HFDTE3107090\""}
+    end
+
+    test "with invalid trackpoint" do
+      assert Igc.parse("HFDTE280709\nB1101355206343X00006198WA0058700558") ==
+        {:error, "invalid track point: \"B1101355206343X00006198WA0058700558\""}
+    end
+
     test "without date" do
       assert Igc.parse("B1101355206343N00006198WA0058700558") ==
         {:error, "file must include date"}
-    end
-
-    test "ignores unknown lines" do
-      assert {:ok, %Track{}} = Igc.parse("HFDTE280709\nHFWTF\nB1101355206343N00006198WA0058700558")
     end
   end
 end
