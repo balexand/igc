@@ -1,5 +1,5 @@
 defmodule IgcTest do
-  alias Igc.Track
+  alias Igc.{Track, TrackPoint}
 
   use ExUnit.Case, async: true
   doctest Igc
@@ -23,6 +23,9 @@ defmodule IgcTest do
           %{datetime: ~N[2009-07-28 11:01:35], latitude: 52.105716666666666},
           %{datetime: ~N[2009-07-28 11:01:45], latitude: 53.10431666666667}
         ]
+
+      assert %TrackPoint{latitude: 53.10431666666667} = track.landing
+      assert %TrackPoint{latitude: 52.105716666666666} = track.take_off
     end
 
     test "with trackpoints spanning UTC days" do
