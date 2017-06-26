@@ -23,8 +23,8 @@ defmodule Igc.Stats do
   end
 
   defp total_distance([head | tail]) do
-    {_, total} = Enum.reduce(tail, {head, 0}, fn(point, {prev, total}) ->
-      {point, total + distance(point, prev)}
+    {total, _} = Enum.reduce(tail, {0, head}, fn(point, {total, prev}) ->
+      {total + distance(point, prev), point}
     end)
 
     round(total)
