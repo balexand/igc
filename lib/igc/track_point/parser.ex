@@ -61,6 +61,7 @@ defmodule Igc.TrackPoint.Parser do
   defp coord_sign(_, _), do: :error
 
   defp parse_int(str) do
+    # For performance, see https://github.com/balexand/igc/pull/5
     try do
       {:ok, String.to_integer(str)}
     rescue
