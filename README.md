@@ -1,5 +1,9 @@
 # Igc
 
+[![Build Status](https://circleci.com/gh/balexand/igc/tree/master.svg?style=shield)](https://circleci.com/gh/balexand/igc)
+[![Hex Package](http://img.shields.io/hexpm/v/igc.svg?style=flat)](https://hex.pm/packages/igc)
+[![API Docs](https://img.shields.io/badge/api-docs-yellow.svg?style=flat)](https://hexdocs.pm/igc/)
+
 Library for parsing IGC paragliding track files.
 
 ## Installation
