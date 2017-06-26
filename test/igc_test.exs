@@ -9,7 +9,6 @@ defmodule IgcTest do
   @valid_points """
   B1101355206343N00006198WA0058700558
   B1101455306259N00006295WA0059300556
-  B1101555406300N00006061WA0060300576
   """
 
   @valid_igc @valid_date <> @valid_points
@@ -18,12 +17,11 @@ defmodule IgcTest do
     test "with valid data" do
       {:ok, track} = Igc.parse(@valid_igc)
 
-      assert length(track.points) == 3
+      assert length(track.points) == 2
       assert Enum.map(track.points, &(Map.take(&1, [:latitude, :datetime]))) ==
         [
           %{datetime: ~N[2009-07-28 11:01:35], latitude: 52.105716666666666},
-          %{datetime: ~N[2009-07-28 11:01:45], latitude: 53.10431666666667},
-          %{datetime: ~N[2009-07-28 11:01:55], latitude: 54.105}
+          %{datetime: ~N[2009-07-28 11:01:45], latitude: 53.10431666666667}
         ]
     end
 
@@ -68,6 +66,16 @@ defmodule IgcTest do
     test "with invalid trackpoint" do
       assert Igc.parse(@valid_igc <> "B1101355206343X00006198WA0058700558") ==
         {:error, "invalid track point: \"B1101355206343X00006198WA0058700558\""}
+    end
+
+    test "with single point" do
+      single_point =
+        @valid_points
+        |> String.split("\n")
+        |> List.first
+
+      assert Igc.parse(@valid_date <> single_point) ==
+        {:error, "must contain at least 2 points"}
     end
 
     test "without date" do

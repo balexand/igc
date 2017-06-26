@@ -44,7 +44,7 @@ defmodule Igc do
 
   defp post_process(%Track{date: nil}), do: {:error, "file must include date"}
 
-  defp post_process(track = %Track{}) do
+  defp post_process(track = %Track{points: [_, _ | _]}) do
     {:ok, start} = NaiveDateTime.new(track.date, ~T[00:00:00])
 
     track = update_in(track.points, fn pairs ->
@@ -64,6 +64,10 @@ defmodule Igc do
     end)
 
     {:ok, track}
+  end
+
+  defp post_process(%Track{}) do
+    {:error, "must contain at least 2 points"}
   end
 
   defp parse_date(<<day::bytes-size(2), month::bytes-size(2), year::bytes-size(2)>>) do
