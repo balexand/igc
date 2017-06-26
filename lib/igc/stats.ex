@@ -1,5 +1,5 @@
 defmodule Igc.Stats do
-  defstruct distance: nil, duration: nil, max_altitude: nil, min_altitude: nil
+  defstruct [:distance, :duration, :max_altitude, :min_altitude]
 
   alias Igc.{Track, TrackPoint}
 
