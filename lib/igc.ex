@@ -12,25 +12,42 @@ defmodule Igc do
   * `{:ok, track}` upon success
   * `{:error, reason}` when the IGC file is invalid, where `reason` is a human
     readable string explaining why the IGC is invalid
+  * `{:io_error, reason}` when a call to `IO.read/2` fails
   """
   def parse(str) when is_binary(str) do
-    String.splitter(str, ["\r\n", "\n"], trim: true)
-    |> Enum.reduce_while(%Track{}, fn line, track ->
-      case handle_line(track, String.trim(line)) do
-        {:ok, track} -> {:cont, track}
-        {:error, reason} -> {:halt, {:error, reason}}
-      end
-    end)
-    |> case do
-      %Track{} = track -> post_process(track)
-      {:error, reason} -> {:error, reason}
+    {:ok, io} = StringIO.open(str)
+
+    try do
+      parse(io)
+    after
+      StringIO.close(io)
     end
+  end
+
+  def parse(io) when is_pid(io) do
+    do_parse(io, %Track{})
   end
 
   def parse!(igc) do
     case parse(igc) do
       {:ok, track} -> track
       {:error, reason} -> raise ArgumentError, reason
+    end
+  end
+
+  defp do_parse(io, track) do
+    case IO.read(io, :line) do
+      :eof ->
+        post_process(track)
+
+      {:error, reason} ->
+        {:io_error, reason}
+
+      line when is_binary(line) ->
+        case handle_line(track, String.trim(line)) do
+          {:ok, track} -> do_parse(io, track)
+          {:error, reason} -> {:error, reason}
+        end
     end
   end
 
