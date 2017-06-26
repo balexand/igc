@@ -12,6 +12,7 @@ defmodule Igc.StatsTest do
 
     assert stats == %Stats{
       distance: 99_211,
+      duration: 11_044,
       max_altitude: 3_228,
       min_altitude: 1_332,
     }
