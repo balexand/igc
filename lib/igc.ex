@@ -39,7 +39,10 @@ defmodule Igc do
         {:error, reason} -> {:halt, {:error, reason}}
       end
     end)
-    |> post_process
+    |> case do
+      %Track{} = track -> post_process(track)
+      {:error, reason} -> {:error, reason}
+    end
   end
 
   defp handle_line(track, <<"HFDTE", ddmmyy::binary>>) do
@@ -80,8 +83,6 @@ defmodule Igc do
 
     {:ok, track}
   end
-
-  defp post_process(error), do: error
 
   defp parse_date(<<day::bytes-size(2), month::bytes-size(2), year::bytes-size(2)>>) do
     with {day, ""} <- Integer.parse(day),
