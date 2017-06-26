@@ -10,6 +10,9 @@ defmodule Igc.StatsTest do
       |> Igc.parse!
       |> Stats.calculate
 
-    assert stats == %Stats{max_climb: 5.548387096774604}
+    assert stats == %Stats{
+      distance: 99_211,
+      max_climb: 5.548387096774604
+    }
   end
 end
