@@ -1,5 +1,5 @@
 defmodule Igc.Stats do
-  defstruct distance: nil, max_climb: 0
+  defstruct distance: nil, max_climb: 0, max_altitude: nil, min_altitude: nil
 
   alias Igc.{Track, TrackPoint}
 
@@ -25,8 +25,13 @@ defmodule Igc.Stats do
         }
       end)
 
+    # FIXME some devices don't include GPS alt: https://github.com/balexand/igc/issues/18
+    altitudes = Enum.map(points, & &1.gps_altitude)
+
     %{stats |
-      distance: total_distance(points)
+      distance: total_distance(points),
+      max_altitude: Enum.max(altitudes),
+      min_altitude: Enum.min(altitudes),
     }
   end
 
