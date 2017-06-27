@@ -12,7 +12,7 @@ defmodule Igc do
   * `{:ok, track}` upon success
   * `{:error, reason}` when the IGC file is invalid, where `reason` is a human
     readable string explaining why the IGC is invalid
-  * `{:io_error, reason}` when a call to `IO.read/2` fails
+  * `{:io_error, reason}` when a call to `IO.read/2` or `File.open/3` fails
   """
   def parse(str) when is_binary(str) do
     {:ok, io} = StringIO.open(str)
@@ -33,6 +33,17 @@ defmodule Igc do
       {:ok, track} -> track
       {:error, reason} -> raise ArgumentError, reason
     end
+  end
+
+  def parse_file(path) do
+    case File.open(path, [:read_ahead, :utf8], &parse/1) do
+      {:ok, result} -> result
+      {:error, reason} -> {:io_error, reason}
+    end
+  end
+
+  def parse_file!(path) do
+    File.open!(path, [:read_ahead, :utf8], &parse!/1)
   end
 
   defp do_parse(io, track) do
