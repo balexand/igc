@@ -35,6 +35,17 @@ defmodule Igc do
     end
   end
 
+  def parse_file(path) do
+    case File.open(path, [:read_ahead, :utf8], &parse/1) do
+      {:ok, result} -> result
+      {:error, reason} -> {:io_error, reason}
+    end
+  end
+
+  def parse_file!(path) do
+    File.open!(path, [:read_ahead, :utf8], &parse!/1)
+  end
+
   defp do_parse(io, track) do
     case IO.read(io, :line) do
       :eof ->

@@ -104,4 +104,26 @@ defmodule IgcTest do
       end
     end
   end
+
+  describe "parse_file/1" do
+    test "with valid IGC" do
+      assert {:ok, %Track{}} = Igc.parse_file("test/fixtures/2017-06-17-XCT-XXX-01.igc")
+    end
+
+    test "with missing file" do
+      assert {:io_error, :enoent} == Igc.parse_file("test/fixtures/not-a-file.igc")
+    end
+  end
+
+  describe "parse_file!/1" do
+    test "with valid IGC" do
+      assert %Track{} = Igc.parse_file!("test/fixtures/2017-06-17-XCT-XXX-01.igc")
+    end
+
+    test "with missing file" do
+      assert_raise File.Error, "could not open \"test/fixtures/not-a-file.igc\": no such file or directory", fn ->
+        Igc.parse_file!("test/fixtures/not-a-file.igc")
+      end
+    end
+  end
 end
