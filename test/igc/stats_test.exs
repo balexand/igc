@@ -4,9 +4,10 @@ defmodule Igc.StatsTest do
   alias Igc.Stats
 
   test "calculate/1" do
-    %Stats{} = stats = File.open!("test/fixtures/2017-06-17-XCT-XXX-01.igc", [:read_ahead, :utf8], fn f ->
-      f |> Igc.parse! |> Stats.calculate
-    end)
+    %Stats{} = stats =
+      "test/fixtures/2017-06-17-XCT-XXX-01.igc"
+      |> Igc.parse_file!
+      |> Stats.calculate
 
     assert stats == %Stats{
       distance: 99_211,
