@@ -13,7 +13,7 @@ The package can be installed by adding `igc` to your list of dependencies in
 
 ```elixir
 def deps do
-  [{:igc, "~> 0.1.0"}]
+  [{:igc, "~> 0.2.0"}]
 end
 ```
 
