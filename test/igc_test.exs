@@ -56,18 +56,18 @@ defmodule IgcTest do
 
     test "with invalid HFDTE" do
       assert Igc.parse("HFDTE320709\n#{@valid_points}") ==
-        {:error, "invalid date: \"HFDTE320709\""}
+        {:error, {:invalid, "invalid date: \"HFDTE320709\""}}
 
       assert Igc.parse("HFDTEXX0709\n#{@valid_points}") ==
-        {:error, "invalid date: \"HFDTEXX0709\""}
+        {:error, {:invalid, "invalid date: \"HFDTEXX0709\""}}
 
       assert Igc.parse("HFDTE3107090\n#{@valid_points}") ==
-        {:error, "invalid date: \"HFDTE3107090\""}
+        {:error, {:invalid, "invalid date: \"HFDTE3107090\""}}
     end
 
     test "with invalid trackpoint" do
       assert Igc.parse(@valid_igc <> "B1101355206343X00006198WA0058700558") ==
-        {:error, "invalid track point: \"B1101355206343X00006198WA0058700558\""}
+        {:error, {:invalid, "invalid track point: \"B1101355206343X00006198WA0058700558\""}}
     end
 
     test "with single point" do
@@ -77,19 +77,19 @@ defmodule IgcTest do
         |> List.first
 
       assert Igc.parse(@valid_date <> single_point) ==
-        {:error, "must contain at least 2 points"}
+        {:error, {:invalid, "must contain at least 2 points"}}
     end
 
     test "without date" do
       assert Igc.parse(@valid_points) ==
-        {:error, "file must include date"}
+        {:error, {:invalid, "file must include date"}}
     end
 
     test "with IO error" do
       {:ok, io} = StringIO.open(@valid_igc)
       StringIO.close(io)
 
-      assert Igc.parse(io) == {:io_error, :terminated}
+      assert Igc.parse(io) == {:error, {:io, :terminated}}
     end
   end
 
@@ -99,7 +99,7 @@ defmodule IgcTest do
     end
 
     test "with invalid IGC" do
-      assert_raise ArgumentError, "file must include date", fn ->
+      assert_raise ArgumentError, "{:invalid, \"file must include date\"}", fn ->
         Igc.parse!("")
       end
     end
@@ -111,7 +111,7 @@ defmodule IgcTest do
     end
 
     test "with missing file" do
-      assert {:io_error, :enoent} == Igc.parse_file("test/fixtures/not-a-file.igc")
+      assert {:error, {:io, :enoent}} == Igc.parse_file("test/fixtures/not-a-file.igc")
     end
   end
 
