@@ -9,7 +9,7 @@ defmodule Igc.Stats do
 
     %__MODULE__{
       distance: total_distance(points),
-      duration: NaiveDateTime.diff(landing.datetime, take_off.datetime, :second),
+      duration: DateTime.to_unix(landing.datetime) - DateTime.to_unix(take_off.datetime),
       max_altitude: Enum.max(altitudes),
       min_altitude: Enum.min(altitudes),
     }

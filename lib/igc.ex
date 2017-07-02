@@ -93,7 +93,7 @@ defmodule Igc do
           _ -> datetime
         end
 
-        {put_in(point.datetime, datetime), datetime}
+        {put_in(point.datetime, DateTime.from_naive!(datetime, "Etc/UTC")), datetime}
       end)
       |> elem(0)
 
