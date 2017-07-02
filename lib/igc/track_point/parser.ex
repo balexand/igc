@@ -27,8 +27,7 @@ defmodule Igc.TrackPoint.Parser do
          {:ok, gps_altitude} <- parse_int(gps_altitude)
     do
       point = %TrackPoint{
-        latitude: lat,
-        longitude: lng,
+        location: {lng, lat},
         validity: validity,
         pressure_altitude: pressure_altitude,
         gps_altitude: gps_altitude

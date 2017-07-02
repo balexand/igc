@@ -4,6 +4,6 @@ defmodule Igc.TrackPoint do
   [B-Record](http://carrier.csi.cam.ac.uk/forsterlewis/soaring/igc_file_format/igc_format_2008.html#link_4.1).
   """
 
-  @enforce_keys [:latitude, :longitude, :validity, :pressure_altitude, :gps_altitude]
+  @enforce_keys [:location, :validity, :pressure_altitude, :gps_altitude]
   defstruct [:datetime] ++ @enforce_keys
 end

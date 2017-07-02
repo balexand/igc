@@ -15,11 +15,8 @@ defmodule Igc.Stats do
     }
   end
 
-  defp distance(%TrackPoint{} = p1, %TrackPoint{} = p2) do
-    Distance.GreatCircle.distance(
-      {p1.longitude, p1.latitude},
-      {p2.longitude, p2.latitude}
-    )
+  defp distance(%TrackPoint{location: loc1}, %TrackPoint{location: loc2}) do
+    Distance.GreatCircle.distance(loc1, loc2)
   end
 
   defp total_distance([head | tail]) do

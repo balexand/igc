@@ -30,8 +30,7 @@ defmodule Igc.TrackPoint.ParserTest do
       assert parse("B1101355206343N00006198WA0058700558") ==
         {:ok, {
           %Igc.TrackPoint{
-            latitude: 52.105716666666666,
-            longitude: -0.1033,
+            location: {-0.1033, 52.105716666666666},
             validity: "A",
             pressure_altitude: 587,
             gps_altitude: 558
@@ -51,12 +50,12 @@ defmodule Igc.TrackPoint.ParserTest do
 
     test "with S latitude" do
       {:ok, {point, _}} = parse(format(latitude: "5206343S"))
-      assert point.latitude == -52.105716666666666
+      assert {_, -52.105716666666666} = point.location
     end
 
     test "with E longitude" do
       {:ok, {point, _}} = parse(format(longitude: "00006198E"))
-      assert point.longitude == 0.1033
+      assert {0.1033, _} = point.location
     end
 
     test "with V validity" do
