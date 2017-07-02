@@ -13,14 +13,18 @@ defmodule IgcTest do
 
   @valid_igc @valid_date <> @valid_points
 
+  defp sigil_E(content, []) do
+    content |> NaiveDateTime.from_iso8601! |> DateTime.from_naive!("Etc/UTC")
+  end
+
   describe "parse/1" do
     test "with valid data" do
       {:ok, track} = Igc.parse(@valid_igc)
 
       assert length(track.points) == 2
       assert track.points == [
-        %TrackPoint{datetime: ~N[2009-07-28 11:01:35], gps_altitude: 558, location: {-0.1033, 52.105716666666666}, pressure_altitude: 587, validity: "A"},
-        %TrackPoint{datetime: ~N[2009-07-28 11:01:45], gps_altitude: 556, location: {-0.10491666666666667, 53.10431666666667}, pressure_altitude: 593, validity: "A"}
+        %TrackPoint{datetime: ~E[2009-07-28 11:01:35], gps_altitude: 558, location: {-0.1033, 52.105716666666666}, pressure_altitude: 587, validity: "A"},
+        %TrackPoint{datetime: ~E[2009-07-28 11:01:45], gps_altitude: 556, location: {-0.10491666666666667, 53.10431666666667}, pressure_altitude: 593, validity: "A"}
       ]
 
       assert %TrackPoint{location: {-0.1033, 52.105716666666666}} = track.take_off
@@ -41,12 +45,12 @@ defmodule IgcTest do
       {:ok, track} = Igc.parse(igc)
       assert Enum.map(track.points, &(&1.datetime)) ==
         [
-          ~N[2015-08-25 23:59:57],
-          ~N[2015-08-25 23:59:58],
-          ~N[2015-08-25 23:59:59],
-          ~N[2015-08-26 00:00:00],
-          ~N[2015-08-26 00:00:01],
-          ~N[2015-08-26 00:00:02],
+          ~E[2015-08-25 23:59:57],
+          ~E[2015-08-25 23:59:58],
+          ~E[2015-08-25 23:59:59],
+          ~E[2015-08-26 00:00:00],
+          ~E[2015-08-26 00:00:01],
+          ~E[2015-08-26 00:00:02],
         ]
     end
 
