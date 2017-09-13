@@ -3,7 +3,7 @@ jobs:
   build:
     working_directory: ~/igc
     docker:
-      - image: balexand/elixir:otp-20.0-elixir-1.4.5
+      - image: balexand/elixir:otp-20.0-elixir-1.5.1
 
     steps:
       - checkout
